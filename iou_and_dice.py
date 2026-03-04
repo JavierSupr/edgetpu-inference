@@ -85,17 +85,29 @@ def evaluate_dataset(test_dir):
 
     print("\nStarting dataset evaluation...\n")
 
-    for idx, file_name in enumerate(image_files):
+    for idx, image_file in enumerate(image_files):
 
-        image_path = os.path.join(images_dir, file_name)
-        mask_path = os.path.join(masks_dir, file_name)
+        # ambil nama tanpa extension
+        base_name = os.path.splitext(image_file)[0]
 
-        if not os.path.exists(mask_path):
-            print(f"Mask not found for {file_name}, skipping...")
+        image_path = os.path.join(images_dir, image_file)
+
+        # cari mask dengan ekstensi berbeda
+        possible_mask_extensions = [".png", ".jpg", ".jpeg"]
+
+        mask_path = None
+        for ext in possible_mask_extensions:
+            candidate = os.path.join(masks_dir, base_name + ext)
+            if os.path.exists(candidate):
+                mask_path = candidate
+                break
+
+        if mask_path is None:
+            print(f"Mask not found for {image_file}, skipping...")
             continue
 
         image = cv2.imread(image_path)
-        mask = cv2.imread(mask_path, 0)  # grayscale GT mask
+        mask = cv2.imread(mask_path, 0)  # grayscale
 
         # ---------------- Preprocess ----------------
         resized = cv2.resize(image, (input_width, input_height))
@@ -114,7 +126,6 @@ def evaluate_dataset(test_dir):
 
         output_data = interpreter.get_tensor(output_details[0]['index'])
 
-        # Jika output logits (1,H,W,C)
         if len(output_data.shape) == 4:
             pred_mask = np.argmax(output_data[0], axis=-1)
             num_classes = output_data.shape[-1]
@@ -122,7 +133,6 @@ def evaluate_dataset(test_dir):
             pred_mask = output_data[0]
             num_classes = int(np.max(mask)) + 1
 
-        # Resize pred ke ukuran GT
         pred_mask = cv2.resize(
             pred_mask.astype(np.uint8),
             (mask.shape[1], mask.shape[0]),
