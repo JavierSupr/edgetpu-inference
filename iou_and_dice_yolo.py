@@ -25,7 +25,7 @@ IMG_SIZE = 256
 # LOAD MODEL
 # ==============================
 print(f"\nLoading YOLO model: {MODEL_PATH}")
-model = YOLO(MODEL_PATH)
+model = YOLO(MODEL_PATH, task='segment')
 
 print("Model loaded successfully.")
 
