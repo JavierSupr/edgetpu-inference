@@ -161,9 +161,8 @@ def evaluate_dataset(test_dir):
             image_resized,
             conf=CONF_THRES,
             iou=IOU_THRES,
-            imgsz=IMG_SIZE,
-            verbose=False
-        )
+            imgsz=IMG_SIZE
+            )
 
         result = results[0]
 
