@@ -16,6 +16,9 @@ args = parser.parse_args()
 
 MODEL_PATH = args.model
 TEST_DIR = args.test_dir
+CONF_THRES = 0.7
+IOU_THRES = 0.2
+IMG_SIZE = 256
 
 
 # ==============================
@@ -141,16 +144,30 @@ def evaluate_dataset(test_dir):
         if mask_path is None:
             print(f"Mask not found for {image_file}, skipping...")
             continue
-
+        # ==============================
+        # LOAD IMAGE
+        # ==============================
         image = cv2.imread(image_path)
         true_mask = cv2.imread(mask_path, 0)
 
+        # resize sama seperti inference pipeline
+        image_resized = cv2.resize(image, (IMG_SIZE, IMG_SIZE))
+        true_mask = cv2.resize(true_mask, (IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_NEAREST)
+
         # ==============================
-        # YOLO INFERENCE
+        # YOLO INFERENCE (SAMA SEPERTI CORAL PIPELINE)
         # ==============================
-        results = model(image)
+        results = model.predict(
+            image_resized,
+            conf=CONF_THRES,
+            iou=IOU_THRES,
+            imgsz=IMG_SIZE,
+            verbose=False
+        )
 
         result = results[0]
+
+        pred_mask = build_semantic_mask(result, image_resized.shape)
 
         pred_mask = build_semantic_mask(result, image.shape)
 
