@@ -151,18 +151,13 @@ def evaluate_dataset(test_dir):
         true_mask = cv2.imread(mask_path, 0)
 
         # resize sama seperti inference pipeline
-        image_resized = cv2.resize(image, (IMG_SIZE, IMG_SIZE))
-        true_mask = cv2.resize(true_mask, (IMG_SIZE, IMG_SIZE), interpolation=cv2.INTER_NEAREST)
+        image_resized = cv2.resize(image, (256, 256))
+        true_mask = cv2.resize(true_mask, (256, 256), interpolation=cv2.INTER_NEAREST)
 
         # ==============================
         # YOLO INFERENCE (SAMA SEPERTI CORAL PIPELINE)
         # ==============================
-        results = model.predict(
-            image_resized,
-            conf=CONF_THRES,
-            iou=IOU_THRES,
-            imgsz=IMG_SIZE
-            )
+        results = model.predict(image_resized,conf=0.7, iou=0.2, imgsz=256, verbose=False)
 
         result = results[0]
 
