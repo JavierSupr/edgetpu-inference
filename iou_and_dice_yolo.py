@@ -157,7 +157,7 @@ def evaluate_dataset(test_dir):
         # ==============================
         # YOLO INFERENCE (SAMA SEPERTI CORAL PIPELINE)
         # ==============================
-        results = model.predict(image_resized,conf=0.7, iou=0.2, imgsz=256, verbose=False)
+        results = model.predict(image_resized)
 
         result = results[0]
 
