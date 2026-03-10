@@ -1,0 +1,459 @@
+<style>
+
+  /* ============================================
+     OUTER WRAPPER — full width, background here
+  ============================================ */
+  .cta-hero-section {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    min-height: 700px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+  }
+
+  /* ---- DOT GRID ---- */
+  .cta-hero__bg-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, #cbd5e1 1.3px, transparent 1.3px);
+    background-size: 28px 28px;
+    z-index: 0;
+    -webkit-mask-image:
+      linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0) 100%),
+      linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.08) 18%, rgba(0,0,0,0.55) 42%, rgba(0,0,0,1) 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0) 100%),
+      linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 18%, rgba(0,0,0,1) 42%, rgba(0,0,0,1) 100%);
+    mask-composite: intersect;
+  }
+
+  /* ---- CIRCUIT LINES SVG ---- */
+  .cta-hero__bg-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 55%, rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 55%, rgba(0,0,0,0) 100%);
+  }
+
+  /* ============================================
+     INNER WRAPPER — max-width 1200px, centered
+  ============================================ */
+  .cta-hero__inner {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    min-height: 700px;
+  }
+
+  /* ---- CONTENT BLOCK ---- */
+  .cta-hero__content {
+    max-width: 620px;
+    flex-shrink: 0;
+  }
+
+  /* ---- EYEBROW ROW ---- */
+  .cta-hero__eyebrow-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: nowrap;
+  }
+
+  .cta-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #fff0f0;
+    border: 1.5px solid rgba(224,32,32,0.2);
+    color: #cc1a1a;
+    padding: 0 16px;
+    height: 34px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+    .cta-hero__eyebrow-dot {
+    width: 7px;
+    height: 7px;
+    background: #ea242a;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .cta-hero__pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #ffffff;
+    border: 1.5px solid #e5e7eb;
+    color: #374151;
+    padding: 0 14px 0 8px;
+    height: 34px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    line-height: 1;
+  }
+
+  .cta-hero__pill-btn:hover {
+    border-color: #ea242a;
+    color: #ea242a;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .cta-hero__pill-icon {
+    width: 20px;
+    height: 20px;
+    background: #ea242a;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .cta-hero__pill-icon svg { display: block; }
+
+  /* ---- TYPOGRAPHY — DESKTOP ---- */
+  h1.cta-hero__title {
+    font-size: 40px !important;
+    font-weight: 600 !important;
+    color: #0f0f1a;
+    line-height: 1.22;
+    margin-bottom: 18px;
+    letter-spacing: -0.5px;
+    }
+
+  .cta-hero__title-accent { color: #ea242a; }
+
+  .cta-hero__desc {
+    font-size: 16px;
+    color: #6b7280;
+    line-height: 1.75;
+    margin-bottom: 36px;
+    max-width: 100%;
+    font-weight: 400;
+  }
+
+  /* ---- CTA ROW ---- */
+  .cta-hero__cta-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .cta-hero__btn {
+    background: #ea242a;
+    color: white;
+    border: none;
+    padding: 15px 32px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 22px rgba(224,32,32,0.32);
+    white-space: nowrap;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+
+  .cta-hero__btn:hover {
+    background: #c81a1a;
+    color: white;
+    box-shadow: 0 8px 28px rgba(224,32,32,0.42);
+  }
+
+  .cta-hero__see-details {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #ea242a;
+    text-decoration: none;
+    cursor: pointer;
+    padding-bottom: 2px;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s;
+    white-space: nowrap;
+  }
+
+  .cta-hero__see-details:hover { 
+      color: #ea242a;
+      border-bottom-color: #ea242a; }
+
+  /* ---- HERO IMAGE ---- */
+  .cta-hero__image-wrap {
+    flex-shrink: 0;
+    width: 380px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+  }
+
+  .cta-hero__image {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 8px 32px rgba(0,0,0,0.12));
+  }
+
+  /* ============================================
+     TABLET — max-width 1024px
+  ============================================ */
+  @media (max-width: 1024px) {
+    .cta-hero-section {
+      min-height: 580px;
+    }
+
+    .cta-hero__inner {
+      padding: 10px 20px;
+      gap: 32px;
+      min-height: 580px;
+    }
+
+    .cta-hero__content {
+      max-width: 100%;
+      flex: 1;
+    }
+
+
+    h1.cta-hero__title {
+      font-size: 32px !important;
+    }
+
+    .cta-hero__desc {
+      font-size: 16px !important;
+      max-width: 100%;
+    }
+
+    .cta-hero__image-wrap {
+      width: 280px;
+      flex-shrink: 0;
+    }
+
+    /* Pill wrap on tablet if too long */
+    .cta-hero__eyebrow-row {
+      flex-wrap: wrap;
+    }
+  }
+
+  /* ============================================
+     MOBILE — max-width 767px
+  ============================================ */
+  @media (max-width: 767px) {
+    .cta-hero-section {
+      min-height: unset;
+      align-items: flex-start;
+    }
+
+    /* On mobile: dots fade top-to-bottom only, full width visible */
+    .cta-hero__bg-dots {
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0) 100%);
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0) 100%);
+      -webkit-mask-composite: unset;
+      mask-composite: unset;
+    }
+
+    .cta-hero__inner {
+      flex-direction: column;
+      padding: 24px 24px 24px 24px;
+      gap: 0;
+      min-height: unset;
+      align-items: flex-start;
+    }
+
+    .cta-hero__content {
+      max-width: 100%;
+      width: 100%;
+      order: 1;
+    }
+
+    .cta-hero__eyebrow-row {
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .cta-hero__eyebrow {
+      font-size: 0.7rem;
+      height: 30px;
+      padding: 0 12px;
+    }
+
+    .cta-hero__pill-btn {
+      font-size: 0.7rem;
+      height: 30px;
+      padding: 0 12px 0 7px;
+    }
+
+    .cta-hero__pill-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .cta-hero__title {
+      font-size: 28px !important;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      margin-bottom: 14px;
+    }
+
+    .cta-hero__desc {
+      font-size: 14px!important;
+      line-height: 1.7;
+      margin-bottom: 28px;
+      max-width: 100%;
+    }
+
+    .cta-hero__cta-row {
+      gap: 16px;
+    }
+
+    .cta-hero__btn {
+      padding: 13px 24px;
+      font-size: 0.88rem;
+      text-align: center;
+    }
+
+    .cta-hero__see-details {
+      font-size: 0.85rem;
+    }
+
+    /* Image below content on mobile */
+    .cta-hero__image-wrap {
+      order: 2;
+      width: 70%;
+      max-width: 320px;
+      align-self: center;
+      margin: 0 auto;
+      padding: 24px;
+    }
+  }
+
+  /* ============================================
+     SMALL MOBILE — max-width 400px
+  ============================================ */
+  @media (max-width: 400px) {
+    .cta-hero__inner {
+      padding: 32px 20px 0 20px;
+    }
+
+    .cta-hero__title {
+      font-size: 26px !important;
+    }
+
+    .cta-hero__desc {
+      font-size: 13px;
+    }
+
+    /* Stack pill on very small screens */
+    .cta-hero__eyebrow-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+</style>
+
+
+<div class="cta-hero-section">
+
+  <!-- Dot Grid bg -->
+  <div class="cta-hero__bg-dots"></div>
+
+  <!-- Circuit Lines SVG bg -->
+  <svg class="cta-hero__bg-lines" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1440 600">
+    <line x1="0" y1="120" x2="1440" y2="120" stroke="#ea242a" stroke-width="1" opacity="0.07"/>
+    <line x1="0" y1="300" x2="1440" y2="300" stroke="#ea242a" stroke-width="1" opacity="0.06"/>
+    <line x1="0" y1="460" x2="1440" y2="460" stroke="#ea242a" stroke-width="1" opacity="0.05"/>
+    <line x1="360"  y1="0" x2="360"  y2="600" stroke="#ea242a" stroke-width="1" opacity="0.06"/>
+    <line x1="720"  y1="0" x2="720"  y2="600" stroke="#ea242a" stroke-width="1" opacity="0.05"/>
+    <line x1="1080" y1="0" x2="1080" y2="600" stroke="#ea242a" stroke-width="1" opacity="0.06"/>
+    <polyline points="360,0 360,120 540,120 540,0"                       fill="none" stroke="#ea242a" stroke-width="1.5" opacity="0.1"/>
+    <polyline points="720,120 720,300 900,300 900,120 1080,120 1080,300" fill="none" stroke="#ea242a" stroke-width="1.5" opacity="0.08"/>
+    <polyline points="360,300 360,460 540,460 540,600"                   fill="none" stroke="#ea242a" stroke-width="1.5" opacity="0.09"/>
+    <polyline points="900,300 1080,460"                                  fill="none" stroke="#ea242a" stroke-width="1"   opacity="0.06"/>
+    <polyline points="1080,300 1080,460 1260,460 1260,300"               fill="none" stroke="#ea242a" stroke-width="1.5" opacity="0.07"/>
+    <circle cx="360"  cy="120" r="4"   fill="#ea242a" opacity="0.2"/>
+    <circle cx="540"  cy="120" r="4"   fill="#ea242a" opacity="0.17"/>
+    <circle cx="720"  cy="120" r="3.5" fill="#ea242a" opacity="0.15"/>
+    <circle cx="720"  cy="300" r="4"   fill="#ea242a" opacity="0.2"/>
+    <circle cx="900"  cy="300" r="4"   fill="#ea242a" opacity="0.17"/>
+    <circle cx="900"  cy="120" r="3.5" fill="#ea242a" opacity="0.15"/>
+    <circle cx="1080" cy="120" r="3.5" fill="#ea242a" opacity="0.15"/>
+    <circle cx="1080" cy="300" r="4"   fill="#ea242a" opacity="0.18"/>
+    <circle cx="1080" cy="460" r="3.5" fill="#ea242a" opacity="0.13"/>
+    <circle cx="360"  cy="300" r="3.5" fill="#ea242a" opacity="0.14"/>
+    <circle cx="540"  cy="460" r="4"   fill="#ea242a" opacity="0.16"/>
+    <circle cx="1260" cy="300" r="3.5" fill="#ea242a" opacity="0.13"/>
+    <circle cx="1260" cy="460" r="3.5" fill="#ea242a" opacity="0.12"/>
+  </svg>
+
+  <!-- Inner content wrapper max 1200px -->
+  <div class="cta-hero__inner">
+
+    <div class="cta-hero__content">
+
+      <!-- Eyebrow + Pill button row -->
+      <div class="cta-hero__eyebrow-row">
+        <span class="cta-hero__eyebrow">
+          <span class="cta-hero__eyebrow-dot"></span>
+          IT HEADHUNTER
+        </span>
+        <a href="https://idstar.co.id/event/webinar-replay-hire-tech-talent-7-days/" class="cta-hero__pill-btn">
+          <span class="cta-hero__pill-icon">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <polygon points="3,2 8,5 3,8" fill="white"/>
+            </svg>
+          </span>
+          Startalk Webinar (Replay) | #ProfessionalSeries For Founders & CTOs: How to Hire Tech Talent in 7 Days
+        </a>
+        
+      </div>
+
+      <h1 class="cta-hero__title">
+        Hire Developers & Engineers in just <span class="cta-hero__title-accent">7 Days</span>
+      </h1>
+      <p class="cta-hero__desc">
+        Need a solid tech team but your hiring process takes too long? Our IT headhunter services help your company find high-quality tech talent fast, with a precise fit to your requirements.
+      </p>
+      <div class="cta-hero__cta-row">
+        <a href="#contact-us" class="cta-hero__btn"> Start Hiring Now
+        </a>
+        <a href="#what-is" class="cta-hero__see-details">See Details →</a>
+      </div>
+
+    </div>
+
+    <div class="cta-hero__image-wrap">
+      <img class="cta-hero__image"
+        src="https://idstar.co.id/wp-content/uploads/2026/03/tzoyvv24ifl2k7hqg3ni-e1772599481942-1.webp"
+        fetchpriority="high" loading="eager"
+        alt="Ilustrasi IT Headhunter"/>
+    </div>
+
+  </div>
+</div>

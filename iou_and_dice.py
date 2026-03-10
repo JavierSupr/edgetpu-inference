@@ -12,20 +12,28 @@ from pycoral.adapters import common
 # ARGUMENT PARSER
 # ==============================
 parser = argparse.ArgumentParser(description="Edge TPU Video + Dataset Evaluation")
+
 parser.add_argument("--model", required=True, help="Path to Edge TPU model (.tflite)")
 parser.add_argument("--video", required=True, help="Path to input video")
 parser.add_argument("--test_dir", required=True, help="Path to test dataset folder")
+
+parser.add_argument("--mask_dir", required=True, help="Path to mask folder")
+parser.add_argument("--mask_dir_rev", required=False, help="Path to alternative mask folder")
+
 args = parser.parse_args()
 
 MODEL_PATH = args.model
 VIDEO_PATH = args.video
 TEST_DIR = args.test_dir
+masks = args.mask_dir
+masks_output = args.mask_dir_rev
 
 
 # ==============================
 # LOAD MODEL
 # ==============================
 print(f"\nLoading model: {MODEL_PATH}")
+
 interpreter = make_interpreter(MODEL_PATH)
 interpreter.allocate_tensors()
 
@@ -46,10 +54,12 @@ print(f"Input dtype : {input_dtype}")
 # METRIC FUNCTION
 # ==============================
 def compute_metrics(pred_mask, true_mask, num_classes):
+
     iou_list = []
     dice_list = []
 
     for cls in range(num_classes):
+
         pred_cls = (pred_mask == cls)
         true_cls = (true_mask == cls)
 
@@ -74,9 +84,7 @@ def compute_metrics(pred_mask, true_mask, num_classes):
 # ==============================
 # DATASET EVALUATION
 # ==============================
-def evaluate_dataset(test_dir):
-    images_dir = os.path.join(test_dir, "images")
-    masks_dir = os.path.join(test_dir, "masks")
+def evaluate_dataset(images_dir, masks, masks_output=None):
 
     image_files = sorted(os.listdir(images_dir))
 
@@ -87,29 +95,40 @@ def evaluate_dataset(test_dir):
 
     for idx, image_file in enumerate(image_files):
 
-        # ambil nama tanpa extension
         base_name = os.path.splitext(image_file)[0]
 
         image_path = os.path.join(images_dir, image_file)
 
-        # cari mask dengan ekstensi berbeda
+        # ==============================
+        # FIND MASK
+        # ==============================
         possible_mask_extensions = [".png", ".jpg", ".jpeg"]
 
         mask_path = None
+
         for ext in possible_mask_extensions:
-            candidate = os.path.join(masks_dir, base_name + ext)
+
+            candidate = os.path.join(masks, base_name + ext)
             if os.path.exists(candidate):
                 mask_path = candidate
                 break
+
+            if masks_output is not None:
+                candidate_rev = os.path.join(masks_output, base_name + ext)
+                if os.path.exists(candidate_rev):
+                    mask_path = candidate_rev
+                    break
 
         if mask_path is None:
             print(f"Mask not found for {image_file}, skipping...")
             continue
 
         image = cv2.imread(image_path)
-        mask = cv2.imread(mask_path, 0)  # grayscale
+        mask = cv2.imread(mask_path, 0)
 
-        # ---------------- Preprocess ----------------
+        # ==============================
+        # PREPROCESS
+        # ==============================
         resized = cv2.resize(image, (input_width, input_height))
         resized = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
 
@@ -120,7 +139,9 @@ def evaluate_dataset(test_dir):
         else:
             input_tensor = (input_tensor / 255.0).astype(np.float32)
 
-        # ---------------- Inference ----------------
+        # ==============================
+        # INFERENCE
+        # ==============================
         common.set_input(interpreter, input_tensor)
         interpreter.invoke()
 
@@ -139,6 +160,9 @@ def evaluate_dataset(test_dir):
             interpolation=cv2.INTER_NEAREST
         )
 
+        # ==============================
+        # METRICS
+        # ==============================
         iou, dice = compute_metrics(pred_mask, mask, num_classes)
 
         total_iou.append(iou)
@@ -156,4 +180,10 @@ def evaluate_dataset(test_dir):
 # ==============================
 # RUN DATASET EVALUATION
 # ==============================
-evaluate_dataset(TEST_DIR)
+images_dir = os.path.join(TEST_DIR, "images")
+
+evaluate_dataset(
+    images_dir,
+    masks,
+    masks_output
+)
