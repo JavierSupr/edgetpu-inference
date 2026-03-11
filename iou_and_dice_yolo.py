@@ -157,8 +157,7 @@ def evaluate_dataset(test_dir):
         # ==============================
         # YOLO INFERENCE (SAMA SEPERTI CORAL PIPELINE)
         # ==============================
-        results = model.predict(image_resized)
-
+        results = model.predict(image_resized, conf=0.2, iou=0.2, imgsz=256, verbose=False)
         result = results[0]
 
         pred_mask = build_semantic_mask(result, image_resized.shape)
