@@ -35,8 +35,8 @@ print("Model loaded successfully.")
 # ==============================
 def compute_metrics(pred_mask, true_mask, num_classes):
 
-    iou_list = []
-    dice_list = []
+    iou_per_class = {}
+    dice_per_class = {}
 
     for cls in range(num_classes):
 
@@ -47,18 +47,24 @@ def compute_metrics(pred_mask, true_mask, num_classes):
         union = np.logical_or(pred_cls, true_cls).sum()
 
         if union == 0:
-            continue
+            iou = 0
+        else:
+            iou = intersection / (union + 1e-7)
 
-        iou = intersection / (union + 1e-7)
-        dice = (2 * intersection) / (pred_cls.sum() + true_cls.sum() + 1e-7)
+        denom = pred_cls.sum() + true_cls.sum()
 
-        iou_list.append(iou)
-        dice_list.append(dice)
+        if denom == 0:
+            dice = 0
+        else:
+            dice = (2 * intersection) / (denom + 1e-7)
 
-    if len(iou_list) == 0:
-        return 0, 0
+        iou_per_class[cls] = iou
+        dice_per_class[cls] = dice
 
-    return np.mean(iou_list), np.mean(dice_list)
+    mean_iou = np.mean(list(iou_per_class.values()))
+    mean_dice = np.mean(list(dice_per_class.values()))
+
+    return mean_iou, mean_dice, iou_per_class, dice_per_class
 
 
 # ==============================
@@ -166,10 +172,18 @@ def evaluate_dataset(test_dir):
 
         num_classes = int(np.max(true_mask)) + 1
 
-        iou, dice = compute_metrics(pred_mask, true_mask, num_classes)
+        iou, dice, iou_per_class, dice_per_class = compute_metrics(pred_mask, true_mask, num_classes)
 
         total_iou.append(iou)
         total_dice.append(dice)
+        print(f"\nImage: {image_file}")
+
+        for cls in range(num_classes):
+            print(f"Class {cls} | IoU: {iou_per_class[cls]:.4f} | Dice: {dice_per_class[cls]:.4f}")
+
+            print(f"Mean IoU  : {iou:.4f}")
+            print(f"Mean Dice : {dice:.4f}")
+            print("-" * 40)
 
         print(f"[{idx+1}/{len(image_files)}] IoU: {iou:.4f} | Dice: {dice:.4f}")
 
