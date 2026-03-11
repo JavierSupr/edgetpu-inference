@@ -96,7 +96,7 @@ def build_semantic_mask(result, shape):
     # =============================
     for i, cls in enumerate(classes):
 
-        if cls in [3, 4]:
+        if cls in [1, 2]:
 
             semantic_mask[processed_masks[i]] = cls
 
@@ -105,7 +105,7 @@ def build_semantic_mask(result, shape):
     # =============================
     for i, cls in enumerate(classes):
 
-        if cls in [1, 2]:
+        if cls in [3, 4]:
 
             mask = processed_masks[i]
 
@@ -159,13 +159,13 @@ def evaluate_dataset(test_dir):
         # resize sama seperti inference pipeline
         image_resized = cv2.resize(image, (256, 256))
         true_mask = cv2.resize(true_mask, (256, 256), interpolation=cv2.INTER_NEAREST)
-        print(model.names)
 
         # ==============================
         # YOLO INFERENCE (SAMA SEPERTI CORAL PIPELINE)
         # ==============================
         results = model.predict(image_resized, conf=0.2, iou=0.2, imgsz=256, verbose=False)
         result = results[0]
+        print(result)
 
         pred_mask = build_semantic_mask(result, image_resized.shape)
 
@@ -177,7 +177,7 @@ def evaluate_dataset(test_dir):
 
         total_iou.append(iou)
         total_dice.append(dice)
-        print(f"\nImage: {image_file}")
+        #print(f"\nImage: {image_file}")
 
         #for cls in range(num_classes):
         #    print(f"Class {cls} | IoU: {iou_per_class[cls]:.4f} | Dice: {dice_per_class[cls]:.4f}")
@@ -188,10 +188,10 @@ def evaluate_dataset(test_dir):
 
         print(f"[{idx+1}/{len(image_files)}] IoU: {iou:.4f} | Dice: {dice:.4f}")
 
-    print("\n===== DATASET RESULT =====")
-    print(f"Images Evaluated : {len(total_iou)}")
-    print(f"Mean IoU         : {np.mean(total_iou):.4f}")
-    print(f"Mean Dice        : {np.mean(total_dice):.4f}")
+    #print("\n===== DATASET RESULT =====")
+    #print(f"Images Evaluated : {len(total_iou)}")
+    #print(f"Mean IoU         : {np.mean(total_iou):.4f}")
+    #print(f"Mean Dice        : {np.mean(total_dice):.4f}")
     print("=================================\n")
 
 
