@@ -96,7 +96,7 @@ def build_semantic_mask(result, shape):
     # =============================
     for i, cls in enumerate(classes):
 
-        if cls in [1, 2]:
+        if cls in [0, 1]:
 
             semantic_mask[processed_masks[i]] = cls
 
@@ -105,7 +105,7 @@ def build_semantic_mask(result, shape):
     # =============================
     for i, cls in enumerate(classes):
 
-        if cls in [3, 4]:
+        if cls in [2, 3]:
 
             mask = processed_masks[i]
 
