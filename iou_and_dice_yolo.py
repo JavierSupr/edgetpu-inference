@@ -123,7 +123,7 @@ def build_semantic_mask(result, shape):
 def evaluate_dataset(test_dir):
 
     images_dir = os.path.join(test_dir, "images")
-    masks_dir = os.path.join(test_dir, "masks_output")
+    masks_dir = os.path.join(test_dir, "masks")
 
     image_files = sorted(os.listdir(images_dir))
 
