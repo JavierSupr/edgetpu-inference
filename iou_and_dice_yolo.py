@@ -159,6 +159,7 @@ def evaluate_dataset(test_dir):
         # resize sama seperti inference pipeline
         image_resized = cv2.resize(image, (256, 256))
         true_mask = cv2.resize(true_mask, (256, 256), interpolation=cv2.INTER_NEAREST)
+        print(model.names)
 
         # ==============================
         # YOLO INFERENCE (SAMA SEPERTI CORAL PIPELINE)
@@ -178,12 +179,12 @@ def evaluate_dataset(test_dir):
         total_dice.append(dice)
         print(f"\nImage: {image_file}")
 
-        for cls in range(num_classes):
-            print(f"Class {cls} | IoU: {iou_per_class[cls]:.4f} | Dice: {dice_per_class[cls]:.4f}")
-
-            print(f"Mean IoU  : {iou:.4f}")
-            print(f"Mean Dice : {dice:.4f}")
-            print("-" * 40)
+        #for cls in range(num_classes):
+        #    print(f"Class {cls} | IoU: {iou_per_class[cls]:.4f} | Dice: {dice_per_class[cls]:.4f}")
+#
+        #    print(f"Mean IoU  : {iou:.4f}")
+        #    print(f"Mean Dice : {dice:.4f}")
+        #    print("-" * 40)
 
         print(f"[{idx+1}/{len(image_files)}] IoU: {iou:.4f} | Dice: {dice:.4f}")
 
