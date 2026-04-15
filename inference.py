@@ -110,6 +110,7 @@ for idx, img_name in enumerate(image_files):
     try:
          # ==============================
         # PARSING OUTPUT (SEGMENTATION)
+        print(outputs)
         # ==============================
         output = outputs[0][0]  # (256,256,5)
         mask_class = np.argmax(output, axis=-1)
