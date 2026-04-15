@@ -47,7 +47,10 @@ print("Model loaded successfully.")
 print(f"Input size: {input_width}x{input_height}")
 print(f"Input dtype: {input_dtype}")
 
-
+output_details = interpreter.get_output_details()
+outputs = [interpreter.get_tensor(o['index']) for o in output_details]
+for i, out in enumerate(outputs):
+    print(f"Output {i} shape:", out.shape)
 # ==============================
 # LOAD IMAGE LIST
 # ==============================
