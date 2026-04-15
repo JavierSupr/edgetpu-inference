@@ -108,28 +108,13 @@ for idx, img_name in enumerate(image_files):
     detections = []
 
     try:
-        boxes = outputs[0]
-        classes = outputs[1]
-        scores = outputs[2]
-        masks = outputs[3] if len(outputs) > 3 else None
-
-        num = len(scores)
-
-        for i in range(num):
-            score = float(scores[i])
-
-            if score < 0.25:
-                continue
-
-            cls = int(classes[i])
-            box = boxes[i]
-
-            if masks is not None:
-                mask = masks[i]
-            else:
-                mask = None
-
-            detections.append((cls, score, box, mask))
+         # ==============================
+        # PARSING OUTPUT (SEGMENTATION)
+        # ==============================
+        output = outputs[0][0]  # (256,256,5)
+        mask_class = np.argmax(output, axis=-1)
+        mask_conf = np.max(output, axis=-1)
+        unique_classes = np.unique(mask_class)
 
     except Exception as e:
         print("Error parsing output:", e)
@@ -143,23 +128,27 @@ for idx, img_name in enumerate(image_files):
     txt_path = os.path.join(OUTPUT_DIR, base_name + ".txt")
 
     with open(txt_path, "w") as f:
-        for det in detections:
-            cls, score, box, mask = det
 
-            box_list = list(map(float, box))
+        for cls in unique_classes:
 
-            if mask is not None:
-                mask_array = np.array(mask).flatten()
+            # skip background (optional)
+            if cls == 0:
+                continue
 
-                # ⚠️ batasi mask biar ga besar
-                mask_list = list(map(float, mask_array[:200]))
-            else:
-                mask_list = []
+            # ambil mask untuk class ini
+            class_mask = (mask_class == cls).astype(np.uint8)
 
-            # FORMAT SESUAI KEINGINAN
-            line = f"{cls} {score} {box_list} {mask_list}"
+            # confidence rata-rata
+            conf = float(mask_conf[class_mask == 1].mean())
+
+            # flatten mask
+            mask_flat = class_mask.flatten()
+
+            # batasi biar ga besar
+            mask_list = list(map(int, mask_flat[:300]))
+
+            line = f"{cls} {conf} {mask_list}"
             f.write(line + "\n")
-
 
     # ==============================
     # FPS
