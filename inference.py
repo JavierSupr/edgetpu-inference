@@ -2,6 +2,7 @@ import cv2
 import time
 import argparse
 import numpy as np
+import os
 from pycoral.utils.edgetpu import make_interpreter
 from pycoral.adapters import common
 
@@ -9,13 +10,20 @@ from pycoral.adapters import common
 # ==============================
 # ARGUMENT PARSER
 # ==============================
-parser = argparse.ArgumentParser(description="Edge TPU Video Inference with FPS Stats")
+parser = argparse.ArgumentParser(description="Edge TPU Video Inference with Save TXT")
 parser.add_argument("--model", required=True, help="Path to Edge TPU model (.tflite)")
 parser.add_argument("--video", required=True, help="Path to input video")
 args = parser.parse_args()
 
 MODEL_PATH = args.model
 VIDEO_PATH = args.video
+
+
+# ==============================
+# OUTPUT FOLDER
+# ==============================
+OUTPUT_DIR = "labels"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 # ==============================
@@ -51,6 +59,10 @@ frame_count = 0
 
 print("Starting inference...\n")
 
+
+# ==============================
+# MAIN LOOP
+# ==============================
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -78,6 +90,77 @@ while True:
     interpreter.invoke()
 
     # ==============================
+    # GET OUTPUT
+    # ==============================
+    output_details = interpreter.get_output_details()
+    outputs = [interpreter.get_tensor(o['index']) for o in output_details]
+
+    # DEBUG (aktifkan kalau perlu)
+    # for i, out in enumerate(outputs):
+    #     print(f"Output {i} shape:", out.shape)
+
+    # ==============================
+    # PARSING (SESUAIKAN DENGAN MODELMU)
+    # ==============================
+    detections = []
+
+    try:
+        boxes = outputs[0]
+        classes = outputs[1]
+        scores = outputs[2]
+
+        masks = outputs[3] if len(outputs) > 3 else None
+
+        num = len(scores)
+
+        for i in range(num):
+            score = float(scores[i])
+
+            if score < 0.25:
+                continue
+
+            cls = int(classes[i])
+            box = boxes[i]
+
+            if masks is not None:
+                mask = masks[i]
+            else:
+                mask = None
+
+            detections.append((cls, score, box, mask))
+
+    except Exception as e:
+        print("Error parsing output:", e)
+        continue
+
+
+    # ==============================
+    # SAVE TXT
+    # ==============================
+    frame_name = f"frame_{frame_count:04d}"
+    txt_path = os.path.join(OUTPUT_DIR, frame_name + ".txt")
+
+    with open(txt_path, "w") as f:
+        for det in detections:
+            cls, score, box, mask = det
+
+            # pastikan list biar ada []
+            box_list = list(map(float, box))
+
+            if mask is not None:
+                mask_array = np.array(mask).flatten()
+
+                # ⚠️ batasi biar file ga besar
+                mask_list = list(map(float, mask_array[:200]))
+            else:
+                mask_list = []
+
+            # FORMAT SESUAI REQUEST
+            line = f"{cls} {score} {box_list} {mask_list}"
+            f.write(line + "\n")
+
+
+    # ==============================
     # FPS CALCULATION
     # ==============================
     end_time = time.time()
@@ -91,6 +174,7 @@ while True:
 
 
 cap.release()
+
 
 # ==============================
 # FPS SUMMARY
