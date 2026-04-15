@@ -10,19 +10,22 @@ from pycoral.adapters import common
 # ==============================
 # ARGUMENT PARSER
 # ==============================
-parser = argparse.ArgumentParser(description="Edge TPU Video Inference with Save TXT")
+parser = argparse.ArgumentParser(description="Edge TPU Image Folder Inference + Save TXT")
 parser.add_argument("--model", required=True, help="Path to Edge TPU model (.tflite)")
-parser.add_argument("--video", required=True, help="Path to input video")
+parser.add_argument("--input", required=True, help="Path to image folder")
 args = parser.parse_args()
 
 MODEL_PATH = args.model
-VIDEO_PATH = args.video
+INPUT_DIR = args.input
 
 
 # ==============================
 # OUTPUT FOLDER
 # ==============================
-OUTPUT_DIR = "labels"
+model_name = os.path.splitext(os.path.basename(MODEL_PATH))[0]
+
+# buat folder: labels_namamode
+OUTPUT_DIR = f"labels_{model_name}"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
@@ -46,27 +49,28 @@ print(f"Input dtype: {input_dtype}")
 
 
 # ==============================
-# OPEN VIDEO
+# LOAD IMAGE LIST
 # ==============================
-cap = cv2.VideoCapture(VIDEO_PATH)
+image_files = sorted([
+    f for f in os.listdir(INPUT_DIR)
+    if f.lower().endswith(('.jpg', '.jpeg', '.png'))
+])
 
-if not cap.isOpened():
-    print("Error opening video file")
-    exit()
-
-fps_list = []
-frame_count = 0
-
-print("Starting inference...\n")
+print(f"Total images: {len(image_files)}\n")
 
 
 # ==============================
 # MAIN LOOP
 # ==============================
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+fps_list = []
+
+for idx, img_name in enumerate(image_files):
+    img_path = os.path.join(INPUT_DIR, img_name)
+
+    frame = cv2.imread(img_path)
+    if frame is None:
+        print(f"Failed to read: {img_name}")
+        continue
 
     start_time = time.time()
 
@@ -95,12 +99,8 @@ while True:
     output_details = interpreter.get_output_details()
     outputs = [interpreter.get_tensor(o['index']) for o in output_details]
 
-    # DEBUG (aktifkan kalau perlu)
-    # for i, out in enumerate(outputs):
-    #     print(f"Output {i} shape:", out.shape)
-
     # ==============================
-    # PARSING (SESUAIKAN DENGAN MODELMU)
+    # PARSING (SESUAIKAN MODEL)
     # ==============================
     detections = []
 
@@ -108,7 +108,6 @@ while True:
         boxes = outputs[0]
         classes = outputs[1]
         scores = outputs[2]
-
         masks = outputs[3] if len(outputs) > 3 else None
 
         num = len(scores)
@@ -135,59 +134,48 @@ while True:
 
 
     # ==============================
-    # SAVE TXT
+    # SAVE TXT (NAMA SAMA DENGAN GAMBAR)
     # ==============================
-    frame_name = f"frame_{frame_count:04d}"
-    txt_path = os.path.join(OUTPUT_DIR, frame_name + ".txt")
+    base_name = os.path.splitext(img_name)[0]
+    txt_path = os.path.join(OUTPUT_DIR, base_name + ".txt")
 
     with open(txt_path, "w") as f:
         for det in detections:
             cls, score, box, mask = det
 
-            # pastikan list biar ada []
             box_list = list(map(float, box))
 
             if mask is not None:
                 mask_array = np.array(mask).flatten()
 
-                # ⚠️ batasi biar file ga besar
+                # ⚠️ batasi mask biar ga besar
                 mask_list = list(map(float, mask_array[:200]))
             else:
                 mask_list = []
 
-            # FORMAT SESUAI REQUEST
+            # FORMAT SESUAI KEINGINAN
             line = f"{cls} {score} {box_list} {mask_list}"
             f.write(line + "\n")
 
 
     # ==============================
-    # FPS CALCULATION
+    # FPS
     # ==============================
     end_time = time.time()
-    inference_time = end_time - start_time
-    fps = 1.0 / inference_time
-
+    fps = 1.0 / (end_time - start_time)
     fps_list.append(fps)
-    frame_count += 1
 
-    print(f"Frame {frame_count:04d} | FPS: {fps:.2f}")
-
-
-cap.release()
+    print(f"[{idx+1}/{len(image_files)}] {img_name} | FPS: {fps:.2f}")
 
 
 # ==============================
 # FPS SUMMARY
 # ==============================
 if len(fps_list) > 0:
-    fps_min = min(fps_list)
-    fps_avg = sum(fps_list) / len(fps_list)
-    fps_max = max(fps_list)
-
     print("\n===== FPS SUMMARY =====")
-    print(f"Total Frames : {frame_count}")
-    print(f"FPS Min      : {fps_min:.2f}")
-    print(f"FPS Average  : {fps_avg:.2f}")
-    print(f"FPS Max      : {fps_max:.2f}")
+    print(f"Images       : {len(fps_list)}")
+    print(f"FPS Min      : {min(fps_list):.2f}")
+    print(f"FPS Average  : {sum(fps_list)/len(fps_list):.2f}")
+    print(f"FPS Max      : {max(fps_list):.2f}")
 else:
-    print("No frames processed.")
+    print("No images processed.")
